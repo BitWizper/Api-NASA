@@ -1,0 +1,20 @@
+{
+  "id": "./",
+  "name": "NASA Explorer — Espacio cercano",
+  "short_name": "NASA Explorer",
+  "description": "Explora la imagen astronómica del día y asteroides cercanos a la Tierra.",
+  "lang": "es-MX",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#111114",
+  "theme_color": "#111114",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

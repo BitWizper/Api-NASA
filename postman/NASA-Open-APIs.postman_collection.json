@@ -1,0 +1,85 @@
+{
+  "info": {
+    "_postman_id": "8657650e-4be5-4e84-9d6f-6a1e313a901e",
+    "name": "NASA Open APIs",
+    "description": "Consultas de APOD y NeoWs. Configura api_key en un Environment local de Postman y no incluyas una clave personal en la colección compartida.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://api.nasa.gov" },
+    { "key": "apodBaseUrl", "value": "https://science.nasa.gov/wp-json/wp/v2/apod-basic" },
+    { "key": "api_key", "value": "" },
+    { "key": "date", "value": "2026-11-17" },
+    { "key": "apodDate", "value": "261117" }
+  ],
+  "item": [
+    {
+      "name": "APOD",
+      "item": [
+        {
+          "name": "Imagen del día",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{apodBaseUrl}}?date_from={{apodDate}}&date_to={{apodDate}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Respuesta APOD válida', function () {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body).to.be.an('array').and.not.empty;",
+                  "  const code = pm.variables.get('apodDate');",
+                  "  const year = Number(code.slice(0, 2));",
+                  "  const expectedDate = `${year >= 95 ? '19' : '20'}${code.slice(0, 2)}-${code.slice(2, 4)}-${code.slice(4, 6)}`;",
+                  "  pm.expect(body[0].date).to.eql(expectedDate);",
+                  "  pm.expect(body[0].title).to.be.a('string').and.not.empty;",
+                  "  pm.expect(body[0].hdurl).to.be.a('string').and.not.empty;",
+                  "  pm.expect(body[0].media_type).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "NeoWs — Objetos cercanos a la Tierra",
+      "item": [
+        {
+          "name": "Objetos cercanos por fecha",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{baseUrl}}/neo/rest/v1/feed?api_key={{api_key}}&start_date={{date}}&end_date={{date}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Respuesta NeoWs con objetos cercanos', function () {",
+                  "  const body = pm.response.json();",
+                  "  const objects = body.near_earth_objects[pm.variables.get('date')];",
+                  "  pm.expect(objects).to.be.an('array');",
+                  "  if (objects.length) {",
+                  "    pm.expect(objects[0]).to.have.property('name');",
+                  "    pm.expect(objects[0]).to.have.property('is_potentially_hazardous_asteroid');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
